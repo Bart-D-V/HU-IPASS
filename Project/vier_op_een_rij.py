@@ -57,11 +57,13 @@ def vallende_steen(bord, kolom):
             return rij
 
 
+# zet een steen in het speelbord.
 def plaats_steen(bord, kolom, rij, speler):
     bord[rij][kolom] = speler
     return bord
 
 
+# functie om vier op een rij te spelen met inputs.
 def speel():
     bord = maak_speelbord()
     speler = 1
