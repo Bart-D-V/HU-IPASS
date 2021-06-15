@@ -1,5 +1,6 @@
 import numpy as np
 import random
+import cProfile as cp
 
 kolom_aantal = 7
 rij_aantal = 6
@@ -244,7 +245,7 @@ def speel():
 
     while True:
         if beurt == bot:
-            zet = minmax(bord, 4, alpha=-999999, beta=999999, maximaliseren=False)[0]
+            zet = minmax(bord, 6, alpha=-999999, beta=999999, maximaliseren=True)[0]
             plaats_steen(bord, zet, vallende_steen(bord, zet), beurt)
 
         else:
@@ -268,4 +269,25 @@ def speel():
             beurt = mens
 
 
-speel()
+def runtime_speel():
+    bord = maak_speelbord()
+    beurt = mens
+    zet = ""
+    print_speelbord(bord)
+
+    for i in range(10):
+        zet = minmax(bord, 6, alpha=-999999, beta=999999, maximaliseren=True)[0]
+        plaats_steen(bord, zet, vallende_steen(bord, zet), beurt)
+
+        print_speelbord(bord)
+        if winst(bord, beurt):
+            print("Speler " + str(beurt) + " heeft gewonnen.")
+            break
+
+        if beurt == mens:
+            beurt = bot
+        else:
+            beurt = mens
+    pass
+
+# runtime_speel()
