@@ -23,12 +23,14 @@ def lees_bord(posities):
 
 def lees_bestand(file):
     i = 0
+    scores = []
     for line in file["positie"]:
-        minmax(lees_bord(line), 4, alpha=-999999, beta=999999, maximaliseren=True)
+        score = minmax(lees_bord(line), 4, alpha=-999999, beta=999999, maximaliseren=True)[1]
+        scores.append(score)
         i += 1
         if i % 100 == 0:
             print("+100 gedaan")
-    pass
+    print(scores)
 
 
 cp.run('lees_bestand(file)')

@@ -1,6 +1,6 @@
 import numpy as np
-import random
-import cProfile as cp
+import tkinter as tk
+from game2dboard import Board
 
 kolom_aantal = 7
 rij_aantal = 6
@@ -175,22 +175,22 @@ def einde_spel(bord):
 def minmax(bord, diepte, alpha, beta, maximaliseren):
     speelbaren_kolommen = speelbare_kolommen(bord)
 
-    # Diepte bereikt en de score van de positie terug geven.
-    if diepte == 0:
-        return None, positie_score(bord, bot)
     # Check of er vier op een rij is of een vol speelbord.
-    elif einde_spel(bord):
+    if einde_spel(bord):
         if winst(bord, mens):
             return None, -999999
         elif winst(bord, bot):
             return None, 999999
         else:
             return None, 0
+    # Diepte bereikt en de score van de positie terug geven.
+    elif diepte == 0:
+        return None, positie_score(bord, bot)
 
     # Maximaliseren van de score.
     if maximaliseren:
         score = -999999
-        zet = random.choice(speelbaren_kolommen)
+        zet = 3
 
         # Alle speelbaren kolommen proberen.
         for kol in speelbaren_kolommen:
@@ -204,8 +204,8 @@ def minmax(bord, diepte, alpha, beta, maximaliseren):
             if nieuwe_score > score:
                 score = nieuwe_score
                 zet = kol
-            alpha = max(alpha, score)
 
+            alpha = max(alpha, score)
             if alpha >= beta:
                 break
 
@@ -214,7 +214,7 @@ def minmax(bord, diepte, alpha, beta, maximaliseren):
     # Minimaliseren van de score.
     else:
         score = 999999
-        zet = random.choice(speelbaren_kolommen)
+        zet = 3
 
         # Alle speelbaren kolommen proberen.
         for kol in speelbaren_kolommen:
@@ -228,8 +228,8 @@ def minmax(bord, diepte, alpha, beta, maximaliseren):
             if nieuwe_score < score:
                 score = nieuwe_score
                 zet = kol
-            beta = min(beta, score)
 
+            beta = min(beta, score)
             if alpha >= beta:
                 break
 
@@ -238,14 +238,14 @@ def minmax(bord, diepte, alpha, beta, maximaliseren):
 
 # functie om vier op een rij te spelen met inputs.
 def speel():
-    bord = maak_speelbord()
+    bord = Board(rij_aantal, kolom_aantal)
     beurt = mens
     zet = ""
-    print_speelbord(bord)
+    bord.show()
 
     while True:
         if beurt == bot:
-            zet = minmax(bord, 6, alpha=-999999, beta=999999, maximaliseren=True)[0]
+            zet = minmax(bord, 5, alpha=-999999, beta=999999, maximaliseren=True)[0]
             plaats_steen(bord, zet, vallende_steen(bord, zet), beurt)
 
         else:
@@ -269,25 +269,25 @@ def speel():
             beurt = mens
 
 
-def runtime_speel():
-    bord = maak_speelbord()
-    beurt = mens
-    zet = ""
-    print_speelbord(bord)
+def muisklik(btn, rij, kolom):
+    # speler
+    if kolom in speelbare_kolommen(bord):
+        pass
+    plaats_steen(bord, kolom, vallende_steen(bord, kolom), 1)
+    gui_bord.load(np.flipud(bord))
 
-    for i in range(10):
-        zet = minmax(bord, 6, alpha=-999999, beta=999999, maximaliseren=True)[0]
-        plaats_steen(bord, zet, vallende_steen(bord, zet), beurt)
+    # AI
+    zet = minmax(bord, 6, alpha=-999999, beta=999999, maximaliseren=True)[0]
+    plaats_steen(bord, zet, vallende_steen(bord, zet), 2)
+    gui_bord.load(np.flipud(bord))
 
-        print_speelbord(bord)
-        if winst(bord, beurt):
-            print("Speler " + str(beurt) + " heeft gewonnen.")
-            break
 
-        if beurt == mens:
-            beurt = bot
-        else:
-            beurt = mens
-    pass
+bord = maak_speelbord()
+gui_bord = Board(rij_aantal, kolom_aantal)
+gui_bord.load(np.flipud(bord))
+gui_bord.title = "Vier op een rij"
+gui_bord.cell_size = 100
+gui_bord.cell_color = "DodgerBlue"
+gui_bord.on_mouse_click = muisklik
 
-# runtime_speel()
+gui_bord.show()
