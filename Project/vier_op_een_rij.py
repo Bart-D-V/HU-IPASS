@@ -269,19 +269,53 @@ def speel():
             beurt = mens
 
 
+""" Gui functies """
+
+
+# Als er een kolom gekozen is word er een voorbeeld van de positie gegeven.
 def muisklik(btn, rij, kolom):
-    # speler
-    if kolom in speelbare_kolommen(bord):
-        pass
-    plaats_steen(bord, kolom, vallende_steen(bord, kolom), 1)
-    gui_bord.load(np.flipud(bord))
+    if kolom not in speelbare_kolommen(bord):
+        return
 
-    # AI
-    zet = minmax(bord, 6, alpha=-999999, beta=999999, maximaliseren=True)[0]
-    plaats_steen(bord, zet, vallende_steen(bord, zet), 2)
-    gui_bord.load(np.flipud(bord))
+    global voorbeeld
+    voorbeeld = bord.copy()
+    plaats_steen(voorbeeld, kolom, vallende_steen(voorbeeld, kolom), 1)
+    gui_bord.load(np.flipud(voorbeeld))
 
 
+# Stelt de zet van de speler vast, en maakt de zet van de bot. plus een check of een van de twee heeft gewonnen.
+def knoppen(knop):
+    if knop == "Return":
+        global bord
+        bord = voorbeeld.copy()
+        if winst(bord, mens):
+            gui_bord.print("Je hebt gewonnen!")
+            stop()
+
+        zet = minmax(bord, 5, alpha=-999999, beta=999999, maximaliseren=True)[0]
+        plaats_steen(bord, zet, vallende_steen(bord, zet), 2)
+        gui_bord.load(np.flipud(bord))
+
+        if winst(bord, bot):
+            gui_bord.print("Helaas je hebt verloren")
+            stop()
+
+    elif knop == "Escape":
+        gui_bord.close()
+
+    elif knop == "F2":
+        bord = maak_speelbord()
+        gui_bord.load(bord)
+
+
+def stop():
+    gui_bord.pause(5000)
+    bord = maak_speelbord()
+    gui_bord.load(bord)
+    gui_bord.print(gui_info)
+
+
+gui_info = "Controles: klik op een kolom, en druk op enter.   F2: restart   Esc: stop"
 bord = maak_speelbord()
 gui_bord = Board(rij_aantal, kolom_aantal)
 gui_bord.load(np.flipud(bord))
@@ -289,5 +323,10 @@ gui_bord.title = "Vier op een rij"
 gui_bord.cell_size = 100
 gui_bord.cell_color = "DodgerBlue"
 gui_bord.on_mouse_click = muisklik
+gui_bord.on_key_press = knoppen
+
+gui_bord.create_output(background_color="wheat4", color="white", font_size=20)
+
+gui_bord.print(gui_info)
 
 gui_bord.show()
