@@ -29,7 +29,7 @@ def lees_bestand(file):
         scores.append(score)
         i += 1
         if i % 100 == 0:
-            print("+100 gedaan")
+            print("+10% gedaan")
     print(scores)
 
 

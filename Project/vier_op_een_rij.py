@@ -1,6 +1,5 @@
 import numpy as np
-import tkinter as tk
-from game2dboard import Board
+from random import choice
 
 kolom_aantal = 7
 rij_aantal = 6
@@ -171,9 +170,16 @@ def einde_spel(bord):
     return winst(bord, 1) or winst(bord, 2) or len(speelbare_kolommen(bord)) == 0
 
 
+# functie die helpt bij het sorteren op middelste kolommen.
+def middelste(n):
+    return abs(n - kolom_aantal / 2)
+
+
 # minmax algoritme.
 def minmax(bord, diepte, alpha, beta, maximaliseren):
-    speelbaren_kolommen = speelbare_kolommen(bord)
+    # pak speelbare kolommen en sorteer ze op middelste.
+    kolom_keuze = speelbare_kolommen(bord)
+    kolom_keuze.sort(key=middelste)
 
     # Check of er vier op een rij is of een vol speelbord.
     if einde_spel(bord):
@@ -193,7 +199,7 @@ def minmax(bord, diepte, alpha, beta, maximaliseren):
         zet = 3
 
         # Alle speelbaren kolommen proberen.
-        for kol in speelbaren_kolommen:
+        for kol in kolom_keuze:
             # Maak een kopie van het speelbord.
             b_kopie = bord.copy()
             rij = vallende_steen(bord, kol)
@@ -201,9 +207,13 @@ def minmax(bord, diepte, alpha, beta, maximaliseren):
             plaats_steen(b_kopie, kol, rij, bot)
             nieuwe_score = minmax(b_kopie, diepte - 1, alpha, beta, False)[1]
 
+            # als nieuwe kolom een hogere score heeft is zet nieuwe kolom.
             if nieuwe_score > score:
                 score = nieuwe_score
                 zet = kol
+            # als scores hetzelfde zijn kies een random kolom als zet.
+            elif nieuwe_score == score:
+                zet = choice([kol, zet])
 
             alpha = max(alpha, score)
             if alpha >= beta:
@@ -217,7 +227,7 @@ def minmax(bord, diepte, alpha, beta, maximaliseren):
         zet = 3
 
         # Alle speelbaren kolommen proberen.
-        for kol in speelbaren_kolommen:
+        for kol in kolom_keuze:
             # Maak een kopie van het speelbord.
             b_kopie = bord.copy()
             rij = vallende_steen(bord, kol)
@@ -234,99 +244,3 @@ def minmax(bord, diepte, alpha, beta, maximaliseren):
                 break
 
         return zet, score
-
-
-# functie om vier op een rij te spelen met inputs.
-def speel():
-    bord = Board(rij_aantal, kolom_aantal)
-    beurt = mens
-    zet = ""
-    bord.show()
-
-    while True:
-        if beurt == bot:
-            zet = minmax(bord, 5, alpha=-999999, beta=999999, maximaliseren=True)[0]
-            plaats_steen(bord, zet, vallende_steen(bord, zet), beurt)
-
-        else:
-            zet = input("Kies een kolom: ")
-            if zet == "stop":
-                break
-            elif int(zet) not in speelbare_kolommen(bord):
-                print("Dat is geen speelbare kolom.")
-                continue
-            else:
-                plaats_steen(bord, int(zet), vallende_steen(bord, int(zet)), beurt)
-
-        print_speelbord(bord)
-        if winst(bord, beurt):
-            print("Speler " + str(beurt) + " heeft gewonnen.")
-            break
-
-        if beurt == mens:
-            beurt = bot
-        else:
-            beurt = mens
-
-
-""" Gui functies """
-
-
-# Als er een kolom gekozen is word er een voorbeeld van de positie gegeven.
-def muisklik(btn, rij, kolom):
-    if kolom not in speelbare_kolommen(bord):
-        return
-
-    global voorbeeld
-    voorbeeld = bord.copy()
-    plaats_steen(voorbeeld, kolom, vallende_steen(voorbeeld, kolom), 1)
-    gui_bord.load(np.flipud(voorbeeld))
-
-
-# Stelt de zet van de speler vast, en maakt de zet van de bot. plus een check of een van de twee heeft gewonnen.
-def knoppen(knop):
-    if knop == "Return":
-        global bord
-        bord = voorbeeld.copy()
-        if winst(bord, mens):
-            gui_bord.print("Je hebt gewonnen!")
-            stop()
-
-        zet = minmax(bord, 5, alpha=-999999, beta=999999, maximaliseren=True)[0]
-        plaats_steen(bord, zet, vallende_steen(bord, zet), 2)
-        gui_bord.load(np.flipud(bord))
-
-        if winst(bord, bot):
-            gui_bord.print("Helaas je hebt verloren")
-            stop()
-
-    elif knop == "Escape":
-        gui_bord.close()
-
-    elif knop == "F2":
-        bord = maak_speelbord()
-        gui_bord.load(bord)
-
-
-def stop():
-    gui_bord.pause(5000)
-    bord = maak_speelbord()
-    gui_bord.load(bord)
-    gui_bord.print(gui_info)
-
-
-gui_info = "Controles: klik op een kolom, en druk op enter.   F2: restart   Esc: stop"
-bord = maak_speelbord()
-gui_bord = Board(rij_aantal, kolom_aantal)
-gui_bord.load(np.flipud(bord))
-gui_bord.title = "Vier op een rij"
-gui_bord.cell_size = 100
-gui_bord.cell_color = "DodgerBlue"
-gui_bord.on_mouse_click = muisklik
-gui_bord.on_key_press = knoppen
-
-gui_bord.create_output(background_color="wheat4", color="white", font_size=20)
-
-gui_bord.print(gui_info)
-
-gui_bord.show()
