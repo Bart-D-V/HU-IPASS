@@ -65,11 +65,11 @@ def vallende_steen(bord, kolom):
 
 # zet een steen in het speelbord.
 def plaats_steen(bord, kolom, rij, speler):
-    print(rij, kolom)
     try:
         bord[rij][kolom] = speler
     except IndexError:
-        plaats_steen(bord, choice(speelbare_kolommen(bord)), rij, speler)
+        zet = speelbare_kolommen(bord)[0]
+        plaats_steen(bord, zet, vallende_steen(bord, zet), speler)
 
 
 """ analyse functies """
@@ -192,7 +192,6 @@ def minmax(bord, diepte, alpha, beta, maximaliseren):
     # pak speelbare kolommen en sorteer ze op middelste.
     kolom_keuze = speelbare_kolommen(bord)
     kolom_keuze.sort(key=middelste)
-
     # Check of er vier op een rij is of een vol speelbord.
     if einde_spel(bord):
         if winst(bord, mens):

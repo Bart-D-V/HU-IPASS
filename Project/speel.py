@@ -122,7 +122,6 @@ gui_bord.on_mouse_click = muisklik
 gui_bord.on_key_press = knoppen
 
 gui_bord.create_output(background_color="wheat4", color="white", font_size=14)
-
-gui_bord.print(gui_info)
+gui_bord.print(gui_info, "moeilijkheid:", diepte)
 
 gui_bord.show()

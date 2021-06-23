@@ -6,6 +6,7 @@ from vier_op_een_rij import rij_aantal, kolom_aantal, vallende_steen, plaats_ste
 file = pd.read_csv("test_data/Test_L1_R3.csv")
 
 
+# maakt van de string in het bestand een bord
 def lees_bord(posities):
     bord = np.zeros((rij_aantal, kolom_aantal))
     speler = 1
@@ -21,6 +22,7 @@ def lees_bord(posities):
     return bord
 
 
+# beoordeeld alle positie in bestand.
 def lees_bestand(file):
     i = 0
     scores = []
