@@ -1,3 +1,4 @@
+import np as np
 import numpy as np
 from random import choice
 
@@ -64,14 +65,18 @@ def vallende_steen(bord, kolom):
 
 # zet een steen in het speelbord.
 def plaats_steen(bord, kolom, rij, speler):
-    bord[rij][kolom] = speler
+    print(rij, kolom)
+    try:
+        bord[rij][kolom] = speler
+    except IndexError:
+        plaats_steen(bord, choice(speelbare_kolommen(bord)), rij, speler)
 
 
 """ analyse functies """
 
 
 # functie om de score te berekenen van een positie.
-def raam_analyse(raam, speler):
+def raam_analyse_opeenrij(raam, speler):
     score = 0
 
     if speler == mens:
@@ -79,10 +84,7 @@ def raam_analyse(raam, speler):
     else:
         tegenstander = mens
 
-    if raam.count(speler) == 4:
-        score += 100
-
-    elif raam.count(speler) == 3 and raam.count(0) == 1:
+    if raam.count(speler) == 3 and raam.count(0) == 1:
         score += 5
 
     elif raam.count(speler) == 2 and raam.count(0) == 2:
@@ -104,7 +106,7 @@ def positie_score(bord, speler):
         for k in range(kolom_aantal - 3):
             # Maak een horizontale raam.
             raam = rij[k:k + 4]
-            score += raam_analyse(raam, speler)
+            score += raam_analyse_opeenrij(raam, speler)
 
     # Verticale score.
     for k in range(kolom_aantal):
@@ -112,21 +114,31 @@ def positie_score(bord, speler):
         for r in range(rij_aantal - 3):
             # Maak een varticale raam.
             raam = kolom[r:r + 4]
-            score += raam_analyse(raam, speler)
+            score += raam_analyse_opeenrij(raam, speler)
 
     # Negatief diagonale score.
     for r in range(rij_aantal - 3):
         for k in range(kolom_aantal - 3):
             # Maak een negatief diagonale raam
             raam = [bord[r + i][k + i] for i in range(4)]
-            score += raam_analyse(raam, speler)
+            score += raam_analyse_opeenrij(raam, speler)
 
     # Positief diagonale score.
     for r in range(rij_aantal - 3):
         for k in range(kolom_aantal - 3):
             # Maak een positief diagonale raam.
             raam = [bord[r + 3 - i][k + i] for i in range(4)]
-            score += raam_analyse(raam, speler)
+            score += raam_analyse_opeenrij(raam, speler)
+
+    # Score voor stenen in middelste kolommen.
+    for k in range(int(kolom_aantal/2) - 1, int(kolom_aantal/2) + 1):
+        raam = [int(i) for i in list(bord[k, :])]
+        score += raam.count(speler)
+    # geef een extra punt voor het middel van het bord.
+    for r in range(int(rij_aantal/2)-1, int(rij_aantal/2)):
+        for k in range(2, 4):
+            if bord[r][k] == speler:
+                score += 1
 
     return score
 
@@ -207,13 +219,10 @@ def minmax(bord, diepte, alpha, beta, maximaliseren):
             plaats_steen(b_kopie, kol, rij, bot)
             nieuwe_score = minmax(b_kopie, diepte - 1, alpha, beta, False)[1]
 
-            # als nieuwe kolom een hogere score heeft is zet nieuwe kolom.
+            # als nieuwe kolom een hogere score heeft is zet de nieuwe kolom.
             if nieuwe_score > score:
                 score = nieuwe_score
                 zet = kol
-            # als scores hetzelfde zijn kies een random kolom als zet.
-            elif nieuwe_score == score:
-                zet = choice([kol, zet])
 
             alpha = max(alpha, score)
             if alpha >= beta:

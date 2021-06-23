@@ -13,7 +13,7 @@ def speel_terminal():
 
     while True:
         if beurt == bot:
-            zet = minmax(bord, 5, alpha=-999999, beta=999999, maximaliseren=True)[0]
+            zet = minmax(bord, 6, alpha=-999999, beta=999999, maximaliseren=True)[0]
             plaats_steen(bord, zet, vallende_steen(bord, zet), beurt)
 
         else:
@@ -50,8 +50,11 @@ def muisklik(btn, rij, kolom):
 
 # Stelt de zet van de speler vast, en maakt de zet van de bot. plus een check of een van de twee heeft gewonnen.
 def knoppen(knop):
+    global bord
+    global voorbeeld
+    global diepte
+
     if knop == "Return":
-        global bord
         bord = voorbeeld.copy()
         if winst(bord, mens):
             gui_bord.print("Je hebt gewonnen!")
@@ -62,7 +65,7 @@ def knoppen(knop):
             stop()
             return
 
-        zet = minmax(bord, 5, alpha=-999999, beta=999999, maximaliseren=True)[0]
+        zet = minmax(bord, diepte, alpha=-999999, beta=999999, maximaliseren=True)[0]
         plaats_steen(bord, zet, vallende_steen(bord, zet), 2)
         gui_bord.load(np.flipud(bord))
 
@@ -71,9 +74,28 @@ def knoppen(knop):
             stop()
             return
 
+    # moeilijkheid aanpassen
+    elif knop == "plus":
+        diepte += 1
+        gui_bord.print(gui_info, "moeilijkheid:", diepte)
+    elif knop == "minus":
+        diepte -= 1
+        gui_bord.print(gui_info, "moeilijkheid:", diepte)
+
+    # zet kiezen via toestenbord
+    elif int(knop) in kol_knop:
+        zet = int(knop)-1
+        if zet not in speelbare_kolommen(bord):
+            return
+
+        voorbeeld = bord.copy()
+        plaats_steen(voorbeeld, zet, vallende_steen(voorbeeld, zet), 1)
+        gui_bord.load(np.flipud(voorbeeld))
+
+    # eindig spel
     elif knop == "Escape":
         gui_bord.close()
-
+    # restart spel
     elif knop == "F2":
         bord = maak_speelbord()
         gui_bord.load(bord)
@@ -87,7 +109,9 @@ def stop():
     gui_bord.print(gui_info)
 
 
-gui_info = "Controles: klik op een kolom, en druk op enter.   F2: restart   Esc: stop"
+diepte = 5
+kol_knop = [1, 2, 3, 4, 5, 6, 7]
+gui_info = "Controles: klik op een kolom, en druk op enter. F2: restart  Esc: stop"
 bord = maak_speelbord()
 gui_bord = Board(rij_aantal, kolom_aantal)
 gui_bord.load(np.flipud(bord))
@@ -97,7 +121,7 @@ gui_bord.cell_color = "DodgerBlue"
 gui_bord.on_mouse_click = muisklik
 gui_bord.on_key_press = knoppen
 
-gui_bord.create_output(background_color="wheat4", color="white", font_size=20)
+gui_bord.create_output(background_color="wheat4", color="white", font_size=14)
 
 gui_bord.print(gui_info)
 
